@@ -27,7 +27,7 @@
 import { ref, computed } from 'vue';
 
 export default {
-  name: 'LdNotifications',
+  name: 'SbNotifications',
   props: {
     position: { type: String, default: 'top-right' },
     duration: { type: Number, default: 5000 }

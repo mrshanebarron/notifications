@@ -31,6 +31,6 @@ class Notifications extends Component
 
     public function render()
     {
-        return view('ld-notifications::livewire.notifications');
+        return view('sb-notifications::livewire.notifications');
     }
 }
