@@ -1,19 +1,21 @@
 @php
-$positions = [
-    'top-right' => 'top-4 right-4',
-    'top-left' => 'top-4 left-4',
-    'bottom-right' => 'bottom-4 right-4',
-    'bottom-left' => 'bottom-4 left-4',
-    'top-center' => 'top-4 left-1/2 -translate-x-1/2',
-    'bottom-center' => 'bottom-4 left-1/2 -translate-x-1/2',
+$positionStyles = [
+    'top-right' => 'top: 1rem; right: 1rem;',
+    'top-left' => 'top: 1rem; left: 1rem;',
+    'bottom-right' => 'bottom: 1rem; right: 1rem;',
+    'bottom-left' => 'bottom: 1rem; left: 1rem;',
+    'top-center' => 'top: 1rem; left: 50%; transform: translateX(-50%);',
+    'bottom-center' => 'bottom: 1rem; left: 50%; transform: translateX(-50%);',
 ];
-$posClass = $positions[$position] ?? $positions['top-right'];
+$posStyle = $positionStyles[$position] ?? $positionStyles['top-right'];
+
 $typeStyles = [
-    'success' => 'bg-green-50 border-green-500 text-green-800',
-    'error' => 'bg-red-50 border-red-500 text-red-800',
-    'warning' => 'bg-yellow-50 border-yellow-500 text-yellow-800',
-    'info' => 'bg-blue-50 border-blue-500 text-blue-800',
+    'success' => ['bg' => '#f0fdf4', 'border' => '#22c55e', 'text' => '#166534', 'icon' => '#22c55e'],
+    'error' => ['bg' => '#fef2f2', 'border' => '#ef4444', 'text' => '#991b1b', 'icon' => '#ef4444'],
+    'warning' => ['bg' => '#fffbeb', 'border' => '#f59e0b', 'text' => '#92400e', 'icon' => '#f59e0b'],
+    'info' => ['bg' => '#eff6ff', 'border' => '#3b82f6', 'text' => '#1e40af', 'icon' => '#3b82f6'],
 ];
+
 $icons = [
     'success' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />',
     'error' => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />',
@@ -22,26 +24,46 @@ $icons = [
 ];
 @endphp
 
-<div class="fixed {{ $posClass }} z-50 space-y-2 max-w-sm w-full" wire:poll.{{ $duration }}ms>
-    @foreach($notifications as $notification)
-        <div
-            class="p-4 border-l-4 rounded-lg shadow-lg {{ $typeStyles[$notification['type']] ?? $typeStyles['info'] }}"
-            wire:key="{{ $notification['id'] }}"
-            x-data="{ show: true }"
-            x-show="show"
-            x-init="setTimeout(() => { show = false; $wire.removeNotification('{{ $notification['id'] }}') }, {{ $duration }})"
-            x-transition
-        >
-            <div class="flex items-start">
-                <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $icons[$notification['type']] ?? $icons['info'] !!}</svg>
-                <div class="flex-1">
-                    @if($notification['title'])<p class="font-medium">{{ $notification['title'] }}</p>@endif
-                    <p class="text-sm">{{ $notification['message'] }}</p>
+<div style="position: fixed; {{ $posStyle }} z-index: 50; max-width: 24rem; width: 100%;">
+    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+        @foreach($notifications as $notification)
+            @php
+                $style = $typeStyles[$notification['type']] ?? $typeStyles['info'];
+                $iconPath = $icons[$notification['type']] ?? $icons['info'];
+            @endphp
+            <div
+                wire:key="{{ $notification['id'] }}"
+                x-data="{ show: true }"
+                x-show="show"
+                x-init="setTimeout(() => { show = false; $wire.removeNotification('{{ $notification['id'] }}') }, {{ $duration }})"
+                x-transition:enter="transition ease-out duration-300"
+                x-transition:enter-start="opacity-0 transform translate-x-full"
+                x-transition:enter-end="opacity-100 transform translate-x-0"
+                x-transition:leave="transition ease-in duration-200"
+                x-transition:leave-start="opacity-100 transform translate-x-0"
+                x-transition:leave-end="opacity-0 transform translate-x-full"
+                style="padding: 1rem; border-left: 4px solid {{ $style['border'] }}; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); background-color: {{ $style['bg'] }}; color: {{ $style['text'] }};"
+            >
+                <div style="display: flex; align-items: flex-start;">
+                    <svg style="width: 1.25rem; height: 1.25rem; margin-right: 0.75rem; flex-shrink: 0; color: {{ $style['icon'] }};" fill="none" viewBox="0 0 24 24" stroke="currentColor">{!! $iconPath !!}</svg>
+                    <div style="flex: 1;">
+                        @if($notification['title'])
+                            <p style="font-weight: 500; margin: 0 0 0.25rem 0;">{{ $notification['title'] }}</p>
+                        @endif
+                        <p style="font-size: 0.875rem; margin: 0;">{{ $notification['message'] }}</p>
+                    </div>
+                    <button
+                        wire:click="removeNotification('{{ $notification['id'] }}')"
+                        style="margin-left: 0.75rem; color: {{ $style['text'] }}; opacity: 0.6; background: none; border: none; cursor: pointer; padding: 0;"
+                        onmouseover="this.style.opacity='1'"
+                        onmouseout="this.style.opacity='0.6'"
+                    >
+                        <svg style="width: 1rem; height: 1rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-                <button wire:click="removeNotification('{{ $notification['id'] }}')" class="ml-3 text-gray-400 hover:text-gray-600">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
             </div>
-        </div>
-    @endforeach
+        @endforeach
+    </div>
 </div>
