@@ -24,7 +24,7 @@ $icons = [
 ];
 @endphp
 
-<div style="position: fixed; {{ $posStyle }} z-index: 50; max-width: 24rem; width: 100%;">
+<div style="position: fixed; {{ $posStyle }} z-index: 9999; max-width: 24rem; width: 100%;">
     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
         @foreach($notifications as $notification)
             @php
