@@ -7,7 +7,7 @@ $positionStyles = [
     'top-center' => 'top: 1rem; left: 50%; transform: translateX(-50%);',
     'bottom-center' => 'bottom: 1rem; left: 50%; transform: translateX(-50%);',
 ];
-$posStyle = $positionStyles[$position] ?? $positionStyles['top-right'];
+$posStyle = $positionStyles[$this->position] ?? $positionStyles['top-right'];
 
 $typeStyles = [
     'success' => ['bg' => '#f0fdf4', 'border' => '#22c55e', 'text' => '#166534', 'icon' => '#22c55e'],
@@ -26,7 +26,7 @@ $icons = [
 
 <div style="position: fixed; {{ $posStyle }} z-index: 9999; max-width: 24rem; width: 100%;">
     <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-        @foreach($notifications as $notification)
+        @foreach($this->notifications as $notification)
             @php
                 $style = $typeStyles[$notification['type']] ?? $typeStyles['info'];
                 $iconPath = $icons[$notification['type']] ?? $icons['info'];
@@ -35,7 +35,7 @@ $icons = [
                 wire:key="{{ $notification['id'] }}"
                 x-data="{ show: true }"
                 x-show="show"
-                x-init="setTimeout(() => { show = false; $wire.removeNotification('{{ $notification['id'] }}') }, {{ $duration }})"
+                x-init="setTimeout(() => { show = false; $wire.removeNotification('{{ $notification['id'] }}') }, {{ $this->duration }})"
                 x-transition:enter="transition ease-out duration-300"
                 x-transition:enter-start="opacity-0 transform translate-x-full"
                 x-transition:enter-end="opacity-100 transform translate-x-0"
